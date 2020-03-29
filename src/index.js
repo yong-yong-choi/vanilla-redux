@@ -1,42 +1,68 @@
 import { createStore } from 'redux';
 
-const plus = document.querySelector('.plus');
-const minus = document.querySelector('.minus');
-const number = document.querySelector('.count');
+const form = document.querySelector("form");
+const input = document.querySelector("input");
+const ul = document.querySelector("ul");
 
+const addToDo = text => {
+  return {
+    type: ADD_TODO,
+    text
+  }
+}
+const deleteToDo = id => {
+  return {
+    type: DELETE_TODO,
+    id
+  }
+}
+const ADD_TODO = "ADD_TODO";
+const DELETE_TODO = "DELETE_TODO";
 
-// const reducer = ( state = 0) => {
-//   return state;
-// }
-
-const addNumber = 'plus';
-const removeNumber = 'minus';
-const countModifier = ( count = 0 , action ) => {
-  //console.log(count, action)
-  switch (action.type) {
-    case addNumber:
-      return count + 1;
-    case removeNumber:
-      return count - 1;
+const reducer = ( state=[], action ) => {
+  //console.log(action, state)
+  switch( action.type ) {
+    case ADD_TODO :
+      return [ { text: action.text , id: Date.now() }, ...state ];
+    case DELETE_TODO:
+      return state.filter( toDo => toDo.id !== action.id );
     default:
-      return count;
-  }  
-}
-const countStore = createStore(countModifier);
-
-// console.log( countStore.getState() );
-
-const onChangeText = () => {
-  number.innerText = countStore.getState();
+      return state;
+  }
 }
 
-countStore.subscribe(onChangeText);
+const store = createStore(reducer);
 
-const handleAdd = ()=> {
-  countStore.dispatch( {  type: addNumber } );
+store.subscribe( () => console.log(store.getState()) );
+
+const paintToDos = () => {
+  ul.innerHTML = '';
+  const toDos = store.getState();
+  toDos.forEach(toDo => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.innerText = 'DEL';
+    btn.addEventListener('click', dispatchDeleteToDo);
+    li.id = toDo.id;
+    li.innerText = toDo.text;
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
 }
-const handleMinus = ()=> {
-  countStore.dispatch( {  type: removeNumber } );
+store.subscribe( paintToDos );
+
+const dispatchAddToDo = text => {
+  store.dispatch(addToDo(text));
 }
-plus.addEventListener('click', handleAdd);
-minus.addEventListener('click', handleMinus);
+const dispatchDeleteToDo = e => {
+  const id = parseInt(e.target.parentNode.id);
+  store.dispatch( deleteToDo(id) )
+}
+const onSubmint = e => {
+  e.preventDefault();
+  const toDo = input.value;
+  input.value = '';
+  dispatchAddToDo(toDo);
+}
+
+form.addEventListener('submit', onSubmint);
