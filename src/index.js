@@ -8,16 +8,19 @@ const number = document.querySelector('.count');
 // const reducer = ( state = 0) => {
 //   return state;
 // }
+
+const addNumber = 'plus';
+const removeNumber = 'minus';
 const countModifier = ( count = 0 , action ) => {
-  console.log(count, action)
-  if ( action.type === 'plus' ) {
-    return count + 1;
-  }  else if ( action.type === 'minus' ) {
-    return count - 1;
-  } else {
-    return count;
-  }
-  
+  //console.log(count, action)
+  switch (action.type) {
+    case addNumber:
+      return count + 1;
+    case removeNumber:
+      return count - 1;
+    default:
+      return count;
+  }  
 }
 const countStore = createStore(countModifier);
 
@@ -30,10 +33,10 @@ const onChangeText = () => {
 countStore.subscribe(onChangeText);
 
 const handleAdd = ()=> {
-  countStore.dispatch( {  type: 'plus' } );
+  countStore.dispatch( {  type: addNumber } );
 }
 const handleMinus = ()=> {
-  countStore.dispatch( {  type: 'minus' } );
+  countStore.dispatch( {  type: removeNumber } );
 }
 plus.addEventListener('click', handleAdd);
 minus.addEventListener('click', handleMinus);
